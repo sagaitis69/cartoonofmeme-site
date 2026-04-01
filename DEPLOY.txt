@@ -1,0 +1,43 @@
+cartoonofmeme.com — pataisytas index.html
+============================================
+
+Kas buvo blogai
+---------------
+Visas <script> blokas (Tawk pokalbiai + „New x1000“ paveikslėlio popup) buvo
+uždarytas HTML komentare <!-- ... -->, todėl naršyklė jo nevykdė — mygtukas
+ir chat neveikė.
+
+Ką pataisėme
+------------
+• Script išimtas iš komentaro, popup ir Tawk vėl aktyvūs.
+• „New x1000“ mygtukas: buvo right:-91px (beveik už ekrano) — pataisyta,
+  mobilus variantas apačioje dešinėje.
+• Popup: aiškesnė struktūra, uždarymas Escape, backdrop paspaudimu, scroll lock.
+• meta description SEO.
+• favicon type=image/png (buvo svg+xml su .png keliu).
+
+Serveryje (tavo kelias)
+-----------------------
+  /home/cartoonofmeme/htdocs/cartoonofmeme.com
+
+Čia turi gulėti index.html ir aplankas assets/ (ir kiti public failai).
+
+Įkėlimas
+--------
+1. SSH į serverį, atsarginė kopija:
+     cp /home/cartoonofmeme/htdocs/cartoonofmeme.com/index.html \
+        /home/cartoonofmeme/htdocs/cartoonofmeme.com/index.html.bak
+
+2. Įkelk šiame repo esantį cartoonofmeme-site/index.html į tą katalogą kaip
+   index.html (per SFTP / FileZilla / WinSCP arba scp iš savo PC), pavyzdžiui:
+
+     scp index.html cartoonofmeme@TAVO_SERVERIS:/home/cartoonofmeme/htdocs/cartoonofmeme.com/
+
+   (pakeisk cartoonofmeme@TAVO_SERVERIS į tikrą SSH vartotoją ir hostą)
+
+3. Palik aplanką assets/ nepaliestą (Vite build: index--2owymTR.js ir t.t.).
+   Jei build’as pasikeitė, atnaujink <script> ir <link> eilutes index.html
+   pagal naujus failų vardus dist/ aplanke.
+
+Pastaba: tekstai „Why Choose Us“ su pasikartojančiais sakiniais yra React
+bundle viduje — jiems reikia taisyti šaltinio repo, ne tik index.html.

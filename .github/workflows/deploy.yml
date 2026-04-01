@@ -1,0 +1,28 @@
+# Įkelia tik index.html į VPS po kiekvieno push į main.
+# Slaptų nėra faile — nustatyk GitHub → Settings → Secrets and variables → Actions:
+#   VPS_HOST          (pvz. 123.45.67.89 arba domenas)
+#   VPS_USER          (pvz. cartoonofmeme)
+#   VPS_SSH_PRIVATE_KEY (pilnas privatų SSH raktas, prasideda -----BEGIN ... KEY-----)
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy index.html to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          source: "index.html"
+          target: "/home/cartoonofmeme/htdocs/cartoonofmeme.com/"
+          overwrite: true

@@ -1,0 +1,42 @@
+SVARBU SAUGUMAS
+================
+• Nerašyk slaptažodžių, SSH raktų ar „duodu prisijungimą“ į Cursor chat,
+  Discord, el. paštą nešifruotai. Jei jau parašei — pakeisk slaptažodį serveryje.
+
+• VPS prieiga automatiniam diegimui: naudok SSH raktą + GitHub Actions
+  „Secrets“, ne slaptažodį workflow faile.
+
+KĄ PADARYTI (žingsniai)
+========================
+1) Sukurk GitHub repo ir push (žr. README.md).
+
+2) Serveryje (prisijungus SSH) įsitikink, kad vartotojas cartoonofmeme gali
+   rašyti į katalogą:
+   /home/cartoonofmeme/htdocs/cartoonofmeme.com/
+
+3) Sugeneruok porą raktų TIK GitHub Actions (ant PC arba VPS):
+   ssh-keygen -t ed25519 -f github-deploy-cartoonofmeme -N ""
+
+4) Viešą dalį (.pub) įdėk į serveryje:
+   ~/.ssh/authorized_keys
+   (to vartotojo, kurį naudos VPS_USER)
+
+5) Privatų raktą (failas be .pub) visą tekstą nukopijuok į GitHub:
+   Repository → Settings → Secrets and variables → Actions → New repository secret
+   Pavadinimas: VPS_SSH_PRIVATE_KEY
+
+6) Kitos paslaptys:
+   VPS_HOST = serverio adresas
+   VPS_USER = ssh prisijungimo vardas
+
+7) Push į main → Actions tab → turi būti žalias „Deploy to VPS“.
+
+REDAGAVIMAS
+===========
+• Keiti index.html šiame repo → commit → push → automatiškai nuskrenda į VPS.
+• Jei keiti React aplikaciją — tai kitas projektas (Vite); ten build ir assets
+  įkeli atskirai.
+
+KELIAS SERVERYJE
+================
+/home/cartoonofmeme/htdocs/cartoonofmeme.com/index.html
