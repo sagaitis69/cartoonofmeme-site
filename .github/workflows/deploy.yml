@@ -17,6 +17,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # appleboy/scp-action keeps path segments: source "assets/foo.js" + target ".../assets/"
+      # became ".../assets/assets/foo.js" on the server — old bundle kept loading. Flatten name.
+      - name: Stage bundle at repo root for SCP
+        run: cp -f assets/index--2owymTR.js ./index--2owymTR.js
+
       - name: Copy index.html to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -33,6 +38,6 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          source: "assets/index--2owymTR.js"
+          source: "index--2owymTR.js"
           target: "/home/cartoonofmeme/htdocs/cartoonofmeme.com/assets/"
           overwrite: true
