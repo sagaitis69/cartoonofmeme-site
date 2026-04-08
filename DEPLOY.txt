@@ -35,9 +35,13 @@ Serveryje (tavo kelias)
 
    (pakeisk cartoonofmeme@TAVO_SERVERIS į tikrą SSH vartotoją ir hostą)
 
-3. Palik aplanką assets/ nepaliestą (Vite build: index--2owymTR.js ir t.t.).
-   Jei build’as pasikeitė, atnaujink <script> ir <link> eilutes index.html
-   pagal naujus failų vardus dist/ aplanke.
+3. Įkelk ir assets/index--2owymTR.js į serverio assets/ aplanką (šis repo turi
+   pataisytą bundle be žalios Blowfish / wallet nuotraukų sekcijos). Pvz.:
+
+     scp assets/index--2owymTR.js cartoonofmeme@TAVO_SERVERIS:/home/cartoonofmeme/htdocs/cartoonofmeme.com/assets/
+
+   Jei vėliau keisi Vite build serveryje ir pasikeis failo vardas hash’e,
+   atnaujink index.html <script src=...> ir pergeneruok patch (žr. tools/patch-blowfish.js).
 
 Pastaba: tekstai „Why Choose Us“ su pasikartojančiais sakiniais yra React
 bundle viduje — jiems reikia taisyti šaltinio repo, ne tik index.html.

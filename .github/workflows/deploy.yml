@@ -1,4 +1,4 @@
-# Įkelia tik index.html į VPS po kiekvieno push į main.
+# Įkelia index.html ir assets/index--2owymTR.js į VPS po kiekvieno push į main.
 # Slaptų nėra faile — nustatyk GitHub → Settings → Secrets and variables → Actions:
 #   VPS_HOST          (pvz. 123.45.67.89 arba domenas)
 #   VPS_USER          (pvz. cartoonofmeme)
@@ -25,4 +25,14 @@ jobs:
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           source: "index.html"
           target: "/home/cartoonofmeme/htdocs/cartoonofmeme.com/"
+          overwrite: true
+
+      - name: Copy patched JS bundle (no green Blowfish block)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          source: "assets/index--2owymTR.js"
+          target: "/home/cartoonofmeme/htdocs/cartoonofmeme.com/assets/"
           overwrite: true
