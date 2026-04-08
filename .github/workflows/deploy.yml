@@ -1,8 +1,15 @@
-# Įkelia index.html ir assets/index--2owymTR.js į VPS po kiekvieno push į main.
-# Slaptų nėra faile — nustatyk GitHub → Settings → Secrets and variables → Actions:
-#   VPS_HOST          (pvz. 123.45.67.89 arba domenas)
-#   VPS_USER          (pvz. cartoonofmeme)
-#   VPS_SSH_PRIVATE_KEY (pilnas privatų SSH raktas, prasideda -----BEGIN ... KEY-----)
+# Deploy index.html + patched JS to VPS over SSH/SCP.
+#
+# Repo → Settings → Secrets and variables → Actions:
+#   VPS_HOST             (IP or hostname, no "ssh user@" prefix)
+#   VPS_USER             (e.g. cartoonofmeme)
+#   VPS_SSH_PRIVATE_KEY  (full private key: -----BEGIN ... KEY----- through END)
+#
+# If a job still fails, open the run log — common issues:
+#   • Secret empty / wrong name (must match exactly)
+#   • Private key pasted with lost newlines — re-paste the whole key
+#   • Server public key not in ~/.ssh/authorized_keys for that user
+#   • Wrong VPS_HOST or firewall blocking GitHub → port 22
 name: Deploy to VPS
 
 on:
@@ -17,27 +24,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # appleboy/scp-action keeps path segments: source "assets/foo.js" + target ".../assets/"
-      # became ".../assets/assets/foo.js" on the server — old bundle kept loading. Flatten name.
       - name: Stage bundle at repo root for SCP
         run: cp -f assets/index--2owymTR.js ./index--2owymTR.js
 
-      - name: Copy index.html to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          source: "index.html"
-          target: "/home/cartoonofmeme/htdocs/cartoonofmeme.com/"
-          overwrite: true
+      - name: Check host and user secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          test -n "$VPS_HOST" || { echo "::error::Set Actions secret VPS_HOST"; exit 1; }
+          test -n "$VPS_USER" || { echo "::error::Set Actions secret VPS_USER"; exit 1; }
 
-      - name: Copy patched JS bundle (no green Blowfish block)
-        uses: appleboy/scp-action@v0.1.7
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          source: "index--2owymTR.js"
-          target: "/home/cartoonofmeme/htdocs/cartoonofmeme.com/assets/"
-          overwrite: true
+          ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H -T 10 "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Upload files (scp)
+        env:
+          SSH_USER: ${{ secrets.VPS_USER }}
+          SSH_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          set -e
+          REMOTE="/home/cartoonofmeme/htdocs/cartoonofmeme.com"
+          OPTS="-o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30"
+          scp $OPTS index.html "${SSH_USER}@${SSH_HOST}:${REMOTE}/index.html"
+          scp $OPTS index--2owymTR.js "${SSH_USER}@${SSH_HOST}:${REMOTE}/assets/index--2owymTR.js"
